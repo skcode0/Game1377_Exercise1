@@ -31,30 +31,88 @@
  *
  */
 
+using System;
+using UnityEditor;
 using UnityEngine;
 
 public class RockPaperScissorsGame : MonoBehaviour
 {
-    private string[] choices = { "rock", "paper", "scissors" };
-
-    public void RockPaperScissors(string playerChoice)
+    public enum Choice
     {
-        Debug.Log("You chose: " + playerChoice);
-        
-        string computerChoice = choices[0];
+        Rock,
+        Paper,
+        Scissors,
+        Lizard,
+        Spock
+    }
+
+    private enum Outcome
+    {
+        Win,
+        Lose,
+        Tie
+    }
+
+    private Choice GetRandomChoice(int enumLen)
+    {
+        return (Choice)UnityEngine.Random.Range(0, enumLen);
+    }
+
+    public void RockPaperScissors(int playerChoice)
+    {
+        Debug.Log("You chose: " + (Choice)playerChoice);
+
+        int enumLen = Enum.GetNames(typeof(Choice)).Length; // doesn't support generic in this Unity version? Use older syntax 
+        Choice computerChoice = GetRandomChoice(enumLen);
+
         Debug.Log("Computer chose: " + computerChoice);
 
-        if (playerChoice == "rock")
+        GetResult((Choice)playerChoice, computerChoice);
+    }
+
+    private void GetResult(Choice p1, Choice p2)
+    {
+        Outcome res;
+
+        if (p1 == p2)
         {
-            Debug.Log("It's a tie! Both chose " + playerChoice);
-        }
-        else if (playerChoice == "paper")
-        {
-            Debug.Log("You win! " + playerChoice + " beats " + computerChoice);
+            res = Outcome.Tie;
         }
         else
         {
-            Debug.Log("You lose! " + computerChoice + " beats " + playerChoice);
+            switch (p1)
+            {
+                case Choice.Rock:
+                    res = (p2 == Choice.Scissors || p2 == Choice.Lizard) ? Outcome.Win : Outcome.Lose;
+                    break;
+                case Choice.Scissors:
+                    res = (p2 == Choice.Paper || p2 == Choice.Lizard) ? Outcome.Win : Outcome.Lose;
+                    break;
+                case Choice.Paper:
+                    res = (p2 == Choice.Rock || p2 == Choice.Spock) ? Outcome.Win : Outcome.Lose;
+                    break;
+                case Choice.Lizard:
+                    res = (p2 == Choice.Paper || p2 == Choice.Spock) ? Outcome.Win : Outcome.Lose;
+                    break;
+                case Choice.Spock:
+                    res = (p2 == Choice.Scissors || p2 == Choice.Rock) ? Outcome.Win : Outcome.Lose;
+                    break;
+                default:
+                    res = Outcome.Tie;
+                    break;
+            }
+        }
+
+        if (res == Outcome.Win){
+            Debug.Log($"You win! {p1} beats {p2}.");
+        }
+        else if (res == Outcome.Lose)
+        {
+            Debug.Log($"You lose! {p2} beats {p1}.");
+        }
+        else
+        {
+            Debug.Log($"It's a tie! Both chose {p1}.");
         }
     }
 }
